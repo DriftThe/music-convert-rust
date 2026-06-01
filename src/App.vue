@@ -31,6 +31,8 @@ onMounted(() => {
     var fileCount = $('#fileCount');
     var decryptBtn = $('#decryptBtn') as HTMLButtonElement;
     var outputDir = $('#outputDir') as HTMLInputElement;
+    var savedDir = localStorage.getItem('outputDir');
+    if (savedDir) outputDir.value = savedDir;
     var deleteSource = $('#deleteSource') as HTMLInputElement;
     var toastContainer = $('#toastContainer');
     var browseBtn = $('#browseBtn') as HTMLButtonElement;
@@ -131,12 +133,17 @@ onMounted(() => {
       try {
         const path = await invoke<string>('browse');
         outputDir!.value = path;
+        localStorage.setItem('outputDir', path);
       } catch (err: any) {
         showToast('浏览失败: ' + err, 'error');
       } finally {
         browseBtn!.disabled = false;
         browseBtn!.textContent = '浏览...';
       }
+    });
+    outputDir!.addEventListener('blur', function () {
+      var val = outputDir!.value.trim();
+      if (val) localStorage.setItem('outputDir', val);
     });
     clearBtn!.addEventListener('click', function () { pendingFiles = []; taskStatuses = {}; renderFileList(); });
     clearDoneBtn!.addEventListener('click', function () {
@@ -590,7 +597,7 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 44px;
-  padding: 0 16px;
+  padding: 0 0 0 16px;
   background: var(--bg-toolbar);
   border-bottom: 1px solid var(--border-app);
   flex-shrink: 0;
@@ -636,7 +643,7 @@ body {
 
 .win-btn {
   width: 46px;
-  height: 32px;
+  height: 44px;
   border: none;
   border-radius: 0;
   background: transparent;
